@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Quiz</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-color, #f4f4f4);
+            color: var(--text-color, #333);
+            transition: background-color 0.5s, color 0.5s;
+        }
+        h1 {
+            color: var(--primary-color, #007BFF);
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .question-container {
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid var(--border-color, #ddd);
+            background-color: var(--container-bg, #fff);
+            width: 60%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        button.correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button.wrong {
+            background-color: #f44336;
+            color: white;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        #result-container {
+            margin-top: 20px;
+            display: none;
+        }
+        #restart-btn {
+            background-color: var(--primary-color, #007BFF);
+            color: white;
+        }
+        #progress-bar {
+            width: 60%;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        #progress-fill {
+            height: 100%;
+            background-color: var(--primary-color, #007BFF);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        #theme-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: var(--primary-color, #007BFF);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-switcher" onclick="toggleTheme()">Tema Değiştir</button>
+    <h1>Gelişmiş Quiz</h1>
+    <p id="question-counter">Soru 1 / 2</p>
+    <div id="progress-bar">
+        <div id="progress-fill"></div>
+    </div>
+    <div class="question-container" id="quiz-container-1">
+        <p><strong>1. Güneş Sistemi'ndeki en büyük gezegen hangisidir?</strong></p>
+        <button onclick="checkAnswer(this, true, 1)">A) Jüpiter</button>
+        <button onclick="checkAnswer(this, false, 1)">B) Mars</button>
+        <button onclick="checkAnswer(this, false, 1)">C) Venüs</button>
+        <button onclick="checkAnswer(this, false, 1)">D) Merkür</button>
+    </div>
+
+    <div class="question-container" id="quiz-container-2" style="display: none;">
+        <p><strong>2. Türkiye'nin başkenti neresidir?</strong></p>
+        <button onclick="checkAnswer(this, false, 2)">A) İstanbul</button>
+        <button onclick="checkAnswer(this, false, 2)">B) İzmir</button>
+        <button onclick="checkAnswer(this, true, 2)">C) Ankara</button>
+        <button onclick="checkAnswer(this, false, 2)">D) Bursa</button>
+    </div>
+
+    <div id="result-container">
+        <h2>Quiz Sonuçları</h2>
+        <p id="result-text"></p>
+        <button id="restart-btn" onclick="restartQuiz()">Tekrar Başla</button>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 2;
+        let correctAnswers = 0;
+
+        function checkAnswer(button, isCorrect, questionNumber) {
+            const buttons = button.parentElement.querySelectorAll('button');
+            const correctButton = Array.from(buttons).find(btn => btn.onclick.toString().includes('true'));
+
+            if (isCorrect) {
+                button.classList.add('correct');
+                correctAnswers++;
+            } else {
+                button.classList.add('wrong');
+                correctButton.classList.add('correct');
+            }
+
+            buttons.forEach(btn => btn.disabled = true);
+
+            setTimeout(() => {
+                moveToNextQuestion(questionNumber);
+            }, 1000);
+        }
+
+        function moveToNextQuestion(questionNumber) {
+            document.getElementById(`quiz-container-${questionNumber}`).style.display = 'none';
+            currentQuestion++;
+
+            if (currentQuestion <= totalQuestions) {
+                document.getElementById(`quiz-container-${currentQuestion}`).style.display = 'block';
+                updateProgressBar();
+                document.getElementById('question-counter').innerText = `Soru ${currentQuestion} / ${totalQuestions}`;
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('question-counter').style.display = 'none';
+            document.getElementById('progress-bar').style.display = 'none';
+
+            document.getElementById('result-text').innerText =
+                `Doğru Cevaplar: ${correctAnswers} / ${totalQuestions}`;
+            document.getElementById('result-container').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            correctAnswers = 0;
+
+            document.getElementById('quiz-container-1').style.display = 'block';
+            document.getElementById('quiz-container-2').style.display = 'none';
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('question-counter').style.display = 'block';
+            document.getElementById('progress-bar').style.display = 'block';
+            document.getElementById('question-counter').innerText = `Soru 1 / ${totalQuestions}`;
+            updateProgressBar();
+
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct', 'wrong');
+            });
+        }
+
+        function updateProgressBar() {
+            const progress = (currentQuestion - 1) / totalQuestions * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+        }
+
+        function toggleTheme() {
+            if (document.body.style.getPropertyValue('--bg-color') === '#333') {
+                document.body.style.setProperty('--bg-color', '#f4f4f4');
+                document.body.style.setProperty('--text-color', '#333');
+                document.body.style.setProperty('--primary-color', '#007BFF');
+                document.body.style.setProperty('--container-bg', '#fff');
+                document.body.style.setProperty('--border-color', '#ddd');
+            } else {
+                document.body.style.setProperty('--bg-color', '#333');
+                document.body.style.setProperty('--text-color', '#fff');
+                document.body.style.setProperty('--primary-color', '#FF5722');
+                document.body.style.setProperty('--container-bg', '#444');
+                document.body.style.setProperty('--border-color', '#666');
+            }
+        }
+    </script>
+</body>
+</html>
